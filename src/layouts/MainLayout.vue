@@ -2,17 +2,17 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
+        <q-btn flat dense round icon="las la-bars" aria-label="Menu" @click="ui.toggleLeftDrawer" />
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
+        <q-toolbar-title>Quasar App</q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+    <q-drawer v-model="ui.leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+        <q-item-label header>Essential Links</q-item-label>
 
         <EssentialLink v-for="link in linksList" :key="link.title" v-bind="link" />
       </q-list>
@@ -25,57 +25,71 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
+import { useUiStore } from 'src/stores/uiStore'
+
+const ui = useUiStore()
 
 const linksList = [
   {
     title: 'Docs',
     caption: 'quasar.dev',
-    icon: 'school',
+    icon: 'las la-graduation-cap',
     link: 'https://quasar.dev',
   },
   {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework',
+    title: 'Usuarios',
+    caption: '',
+    icon: 'lar la-user',
+    link: '/Usuarios',
   },
   {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
+    title: 'Roles',
+    caption: '',
+    icon: 'las la-users-cog',
+    link: '/Roles',
   },
   {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
+    title: 'Participantes',
+    caption: '',
+    icon: 'las la-fist-raised',
+    link: '/Participante',
   },
   {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
+    title: 'Registro',
+    caption: '',
+    icon: 'las la-clipboard-list',
+    link: '/Registro',
   },
   {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
+    title: 'Evento',
+    caption: '',
+    icon: 'las la-calendar-day',
+    link: '/Evento',
+  },
+  {
+    title: 'Comisión',
+    caption: '',
+    icon: 'las la-folder-open',
+    link: '/Comision',
+  },
+  {
+    title: 'Tipo de Comisión',
+    caption: '',
+    icon: 'las la-sitemap',
+    link: '/TipoComision',
+  },
+  {
+    title: 'Mis Datos',
+    caption: '',
+    icon: 'las la-graduation-cap',
+    link: 'https://quasar.dev',
   },
   {
     title: 'Quasar Awesome',
     caption: 'Community Quasar projects',
-    icon: 'favorite',
+    icon: 'las la-shapes',
     link: 'https://awesome.quasar.dev',
   },
 ]
-
-const leftDrawerOpen = ref(false)
-
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value
-}
 </script>
