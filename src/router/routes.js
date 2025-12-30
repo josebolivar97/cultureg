@@ -4,13 +4,13 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/IndexPage.vue') },
-      { path: 'Participante', component: () => import('pages/ParticipantePage.vue') },
-      { path: 'Evento', component: () => import('pages/EventoPage.vue') },
-      { path: 'Registro', component: () => import('pages/RegistroPage.vue') },
-      { path: 'Usuarios', component: () => import('pages/UsuariosPage.vue') },
+      { path: 'Participante', component: () => import('src/pages/Participantes/ParticipantePage.vue') },
+      { path: 'Evento', component: () => import('src/pages/Eventos/EventoPage.vue') },
+      { path: 'Registro', component: () => import('src/pages/Registros/RegistroPage.vue') },
+      { path: 'Usuarios', component: () => import('src/pages/Usuarios/UsuariosPage.vue') },
       { path: 'Comision', component: () => import('pages/Comisiones/ComisionPage.vue') },
-      { path: 'Roles', component: () => import('pages/RolesPage.vue') },
-      { path: 'TipoComision', component: () => import('pages/TipoComisionPage.vue') }
+      { path: 'Roles', component: () => import('src/pages/Roles/RolesPage.vue') },
+      { path: 'TipoComision', component: () => import('src/pages/TipoComisiones/TipoComisionPage.vue') }
     ],
 
   },
