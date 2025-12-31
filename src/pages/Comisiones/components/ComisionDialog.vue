@@ -1,30 +1,52 @@
 <template>
   <q-dialog v-model="open" persistent>
-    <q-card style="width: 520px; max-width: 90vw">
-      <q-card-section class="row items-center justify-between">
+    <q-card style="width: 600px; max-width: 90vw">
+      <q-card-section class="row items-center justify-between bg-primary text-white">
         <div class="text-h6 text-weight-bold">
           {{ isEdit ? 'Editar Comisión' : 'Nueva Comisión' }}
         </div>
-        <q-btn dense flat icon="close" @click="close" />
+        <q-btn dense flat icon="close" color="white" @click="close" />
       </q-card-section>
 
-      <q-separator />
+      <q-card-section class="q-pa-md">
+        <q-form @submit.prevent="submit" class="q-gutter-y-md">
 
-      <q-card-section>
-        <q-form @submit.prevent="submit" @reset.prevent="resetForm" class="q-gutter-md">
-          <q-input
-            filled
-            v-model="form.nombre"
-            label="Nombre de la Comisión"
-            hint="Ingrese el nombre"
-            lazy-rules
-            :rules="[(val) => (val && val.length > 0) || 'Ingrese un nombre']"
-          />
+          <div class="row q-col-gutter-md">
+            <div class="col-12 col-md-6">
+              <div class="text-weight-bold q-mb-xs">Nombre</div>
+              <q-input
+                filled
+                v-model="form.nombre"
+                placeholder="Nombre de la comisión"
+                lazy-rules
+                :rules="[val => !!val || 'El nombre es obligatorio']"
+              />
+            </div>
 
-          <div class="row justify-end q-gutter-sm">
+            <div class="col-12 col-md-6">
+              <div class="text-weight-bold q-mb-xs">Tipo de Comisión</div>
+              <q-select
+                filled
+                v-model="form.tipo_comision_obj"
+                :options="tipoComisionesOptions"
+                option-label="label"
+                option-value="value"
+                label="Seleccione un tipo"
+                lazy-rules
+                :rules="[val => !!val || 'Debe seleccionar un tipo']"
+              />
+            </div>
+          </div>
+
+          <div class="row justify-end q-gutter-sm q-mt-md">
             <q-btn flat label="Cancelar" color="primary" @click="close" />
-            <q-btn :label="isEdit ? 'Actualizar' : 'Guardar'" type="submit" color="primary" />
-            <q-btn label="Limpiar" type="reset" color="primary" flat />
+            <q-btn flat label="Limpiar" color="primary" @click="resetForm" />
+            <q-btn
+              :label="isEdit ? 'Actualizar' : 'Guardar'"
+              type="submit"
+              color="primary"
+              no-caps
+            />
           </div>
         </q-form>
       </q-card-section>
@@ -35,73 +57,72 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 
-/**
- * Props:
- * - modelValue: controla abrir/cerrar (v-model desde el padre)
- * - initialData: datos iniciales para editar (por ejemplo { id, nombre })
- */
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   initialData: { type: Object, default: null }
 })
 
-/**
- * Emits:
- * - update:modelValue: para que v-model funcione
- * - save: devuelve el payload { nombre } al padre
- */
 const emit = defineEmits(['update:modelValue', 'save'])
 
-/**
- * Computed "open" para usar v-model dentro del dialog
- * y que se sincronice con el padre.
- */
 const open = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
 })
 
-/** Saber si estamos editando */
 const isEdit = computed(() => !!props.initialData?.id)
 
-/** Form local del modal */
+// Opciones de ejemplo para el Select (Luego vendrán de tu API de TipoComision)
+const tipoComisionesOptions = [
+  { label: 'Permanente', value: 1 },
+  { label: 'Especial', value: 2 }
+]
+
 const form = ref({
-  nombre: ''
+  nombre: '',
+  tipo_comision_obj: null
 })
 
-/**
- * Cada vez que se abre el modal o cambia initialData,
- * llenamos el form (en edit) o lo limpiamos (en create).
- */
 watch(
   () => [props.modelValue, props.initialData],
   ([isOpen]) => {
     if (!isOpen) return
-
     if (props.initialData) {
-      form.value.nombre = props.initialData.nombre ?? ''
+      form.value.nombre = props.initialData.nombre
+      // Buscamos el objeto que coincida con el ID para el select
+      form.value.tipo_comision_obj = tipoComisionesOptions.find(
+        opt => opt.value === props.initialData.tipo_comision_id
+      ) || null
     } else {
-      form.value.nombre = ''
+      clearForm()
     }
   },
   { immediate: true }
 )
 
-function submit () {
-  // Validación simple extra
-  const nombre = form.value.nombre?.trim()
-  if (!nombre) return
-
-  // Emitimos al padre
-  emit('save', { nombre })
+function clearForm () {
+  form.value = {
+    nombre: '',
+    tipo_comision_obj: null
+  }
 }
 
 function resetForm () {
   if (props.initialData) {
-    form.value.nombre = props.initialData.nombre ?? ''
+    form.value.nombre = props.initialData.nombre
+    form.value.tipo_comision_obj = tipoComisionesOptions.find(
+      opt => opt.value === props.initialData.tipo_comision_id
+    ) || null
   } else {
-    form.value.nombre = ''
+    clearForm()
   }
+}
+
+function submit () {
+  emit('save', {
+    nombre: form.value.nombre.trim(),
+    tipo_comision_id: form.value.tipo_comision_obj.value,
+    tipo_comision_label: form.value.tipo_comision_obj.label
+  })
 }
 
 function close () {

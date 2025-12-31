@@ -11,13 +11,11 @@
       <q-table
         flat
         bordered
-        title="Comisiones"
         :rows="rows"
         :columns="columns"
         :filter="filter"
         row-key="id"
-        no-data-label="No hay datos"
-        no-results-label="No hay resultados"
+        no-data-label="Ningún dato disponible en esta tabla"
       >
         <template #top-right>
           <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar...">
@@ -29,15 +27,14 @@
 
         <template #body-cell-actions="props">
           <q-td class="text-center">
-            <q-btn dense flat icon="edit" @click="openEdit(props.row)" />
-            <q-btn dense flat icon="delete" @click="deleteRow(props.row.id)" />
+            <q-btn dense flat icon="edit" color="grey-7" @click="openEdit(props.row)" />
+            <q-btn dense flat icon="delete" color="negative" @click="deleteRow(props.row.id)" />
           </q-td>
         </template>
       </q-table>
     </div>
 
-    <!-- Modal como componente aparte -->
-    <CommissionDialog
+    <ComisionDialog
       v-model="dialog"
       :initialData="selectedRow"
       @save="handleSave"
@@ -47,27 +44,25 @@
 
 <script setup>
 import { ref } from 'vue'
-import CommissionDialog from 'src/pages/Comisiones/components/ComisionDialog.vue'
+import ComisionDialog from './components/ComisionDialog.vue'
 
 const filter = ref('')
+const dialog = ref(false)
+const selectedRow = ref(null)
 
-// Datos de ejemplo (luego vendrán de Laravel)
+// Datos de ejemplo (Incluye el objeto o nombre del tipo de comisión)
 const rows = ref([
-  { id: 1, nombre: 'Comisión A' },
-  { id: 2, nombre: 'Comisión B' }
+  { id: 1, nombre: 'Comisión de Ética', tipo_comision: 'Permanente', tipo_comision_id: 1 },
+  { id: 2, nombre: 'Comisión de Fiestas', tipo_comision: 'Especial', tipo_comision_id: 2 }
 ])
 
+// Columnas según image_c6e6c3.png
 const columns = [
   { name: 'id', label: 'N°', field: 'id', align: 'left', sortable: true },
   { name: 'nombre', label: 'Nombre', field: 'nombre', align: 'left', sortable: true },
+  { name: 'tipo_comision', label: 'Tipo de Comisión', field: 'tipo_comision', align: 'left', sortable: true },
   { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' }
 ]
-
-// Control del modal
-const dialog = ref(false)
-
-// Fila seleccionada (si es null => crear, si tiene id => editar)
-const selectedRow = ref(null)
 
 function openCreate () {
   selectedRow.value = null
@@ -75,27 +70,30 @@ function openCreate () {
 }
 
 function openEdit (row) {
-  selectedRow.value = { ...row } // copiamos para no mutar directo
+  selectedRow.value = { ...row }
   dialog.value = true
 }
 
 function handleSave (payload) {
-  // payload = { nombre }
-
+  // payload trae { nombre, tipo_comision_id, tipo_comision_label }
   if (selectedRow.value?.id) {
-    // EDITAR
     const idx = rows.value.findIndex(r => r.id === selectedRow.value.id)
     if (idx !== -1) {
-      rows.value[idx].nombre = payload.nombre
+      rows.value[idx] = {
+        ...rows.value[idx],
+        nombre: payload.nombre,
+        tipo_comision_id: payload.tipo_comision_id,
+        tipo_comision: payload.tipo_comision_label
+      }
     }
   } else {
-    // CREAR
     rows.value.push({
-      id: Date.now(),
-      nombre: payload.nombre
+      id: rows.value.length + 1,
+      nombre: payload.nombre,
+      tipo_comision_id: payload.tipo_comision_id,
+      tipo_comision: payload.tipo_comision_label
     })
   }
-
   dialog.value = false
 }
 
