@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex">
-    <span class="text-h1">Roles</span>
+    <div class="text-h3 text-weight-bolder">Roles</div>
   </q-page>
 </template>
 

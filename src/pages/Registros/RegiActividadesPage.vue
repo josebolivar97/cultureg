@@ -1,7 +1,7 @@
 <template>
   <q-page class="q-pa-lg bg-grey-1">
     <div class="row items-center justify-between q-mb-lg">
-      <div class="text-h5 text-weight-bold text-uppercase">Registro de Participaciones</div>
+      <div class="text-h3 text-weight-bolder">Registro de Participaciones</div>
       <q-btn label="Regresar" color="teal" no-caps @click="$router.back()" />
     </div>
 
@@ -15,7 +15,10 @@
           <q-list dense separator>
             <q-item v-for="(val, key) in camposPerfil" :key="key" class="q-py-sm">
               <q-item-section>
-                <q-item-label class="text-weight-bold text-grey-8 text-uppercase" style="font-size: 0.8rem">
+                <q-item-label
+                  class="text-weight-bold text-grey-8 text-uppercase"
+                  style="font-size: 0.8rem"
+                >
                   {{ key }}
                 </q-item-label>
               </q-item-section>
@@ -46,19 +49,23 @@
             :filter="filter"
             row-key="id"
             no-data-label="Ningún dato disponible en esta tabla"
+            rows-per-page-label="Filas por página"
           >
             <template #top-right>
-              <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar:">
-                <template #append>
-                  <q-icon name="search" />
-                </template>
-              </q-input>
+              <div class="row items-center">
+                <span class="q-mr-sm">Buscar:</span>
+                <q-input outlined dense debounce="300" v-model="filter" placeholder="Buscar...">
+                  <template #append>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </div>
             </template>
 
             <template #body-cell-pdf="props">
               <q-td class="text-center">
                 <q-btn
-                  flat
+                  outline
                   dense
                   icon="picture_as_pdf"
                   color="negative"
@@ -68,16 +75,16 @@
             </template>
 
             <template #body-cell-actions="props">
-              <q-td class="text-center q-gutter-x-xs">
+              <q-td class="text-center q-gutter-x-sm">
                 <q-btn
-                  flat
+                  outline
                   dense
                   icon="edit"
-                  color="grey-7"
+                  color="positive"
                   @click="editarActividad(props.row)"
                 />
                 <q-btn
-                  flat
+                  outline
                   dense
                   icon="delete"
                   color="negative"
@@ -100,20 +107,20 @@ const filter = ref('')
 // Datos del participante (Basado en image_d73c1d.png)
 const participante = ref({
   nombre: 'JOSE HUMBERTO BOLIVAR BOLIVAR',
-  dni: '76696586'
+  dni: '76696586',
 })
 
 const camposPerfil = {
-  'Dni': '76696586',
-  'Comision': 'pruebacomision',
+  Dni: '76696586',
+  Comision: 'pruebacomision',
   'Tipo Comision': 'pruebatipcomosion',
-  'Organización': 'MPP',
+  Organización: 'MPP',
   'Fecha de Nacimiento': '25-08-1997',
   'Lugar de Nacimiento': 'Puno / Puno / Puno',
-  'Profesión': 'INGENIERO DE SISTEMAS',
-  'Residencia': 'Jr. 17 de Julio 253',
+  Profesión: 'INGENIERO DE SISTEMAS',
+  Residencia: 'Jr. 17 de Julio 253',
   'Correo Electronico': 'josebolivarbolivar97@gmail.com',
-  'Celular': '923106592'
+  Celular: '923106592',
 }
 
 // Datos de ejemplo para la tabla de actividades
@@ -123,31 +130,37 @@ const actividades = ref([
     institucion: 'Municipalidad Puno',
     reconocimiento: 'Felicitación',
     lugar: 'Puno',
-    fecha: '2025-12-30'
-  }
+    fecha: '2025-12-30',
+  },
 ])
 
 const colActividades = [
   { name: 'id', label: 'N°', field: 'id', align: 'left', sortable: true },
-  { name: 'institucion', label: 'Institución', field: 'institucion', align: 'left', sortable: true },
+  {
+    name: 'institucion',
+    label: 'Institución',
+    field: 'institucion',
+    align: 'left',
+    sortable: true,
+  },
   { name: 'reconocimiento', label: 'Reconocimiento', field: 'reconocimiento', align: 'left' },
   { name: 'lugar', label: 'Lugar', field: 'lugar', align: 'left' },
   { name: 'fecha', label: 'Fecha', field: 'fecha', align: 'left' },
   { name: 'pdf', label: 'Pdf', field: 'pdf', align: 'center' },
-  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' }
+  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' },
 ]
 
 // Funciones para que el linter no dé error por no usar las variables
-function editarActividad (row) {
+function editarActividad(row) {
   console.log('Editando actividad:', row)
 }
 
-function eliminarActividad (id) {
-  actividades.value = actividades.value.filter(a => a.id !== id)
+function eliminarActividad(id) {
+  actividades.value = actividades.value.filter((a) => a.id !== id)
   console.log('Eliminado ID:', id)
 }
 
-function verCertificado (row) {
+function verCertificado(row) {
   console.log('Abriendo PDF de:', row.reconocimiento)
 }
 </script>

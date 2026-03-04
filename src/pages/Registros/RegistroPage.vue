@@ -12,14 +12,26 @@
         bordered
         :rows="rows"
         :columns="columns"
+        :filter="filter"
         row-key="id"
         no-data-label="Ningún dato disponible en esta tabla"
+        rows-per-page-label="Filas por página"
       >
+        <template #top-right>
+          <div class="row items-center">
+            <span class="q-mr-sm">Buscar:</span>
+            <q-input outlined dense debounce="300" v-model="filter" placeholder="Buscar...">
+              <template #append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
+        </template>
         <template #body-cell-actions="props">
           <q-td class="text-center q-gutter-x-sm">
             <q-btn
               dense
-              flat
+              outline
               icon="assignment_ind"
               color="teal"
               @click="verActividades(props.row)"
@@ -29,7 +41,7 @@
 
             <q-btn
               dense
-              flat
+              outline
               icon="add_box"
               color="primary"
               @click="openAddActividad(props.row)"
@@ -55,31 +67,30 @@ import { useRouter } from 'vue-router'
 import ActividadDialog from './components/ActividadDialog.vue'
 
 const router = useRouter()
+const filter = ref('')
 const dialogActividad = ref(false)
 const selectedParticipante = ref(null)
 
-const rows = ref([
-  { id: 1, nombre: 'JOSE HUMBERTO BOLIVAR BOLIVAR', dni: '76696586' }
-])
+const rows = ref([{ id: 1, nombre: 'JOSE HUMBERTO BOLIVAR BOLIVAR', dni: '76696586' }])
 
 const columns = [
   { name: 'id', label: 'N°', field: 'id', align: 'left', sortable: true },
   { name: 'nombre', label: 'Nombre', field: 'nombre', align: 'left', sortable: true },
   { name: 'dni', label: 'Codigo', field: 'dni', align: 'left', sortable: true },
-  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' }
+  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' },
 ]
 
-function verActividades (participante) {
+function verActividades(participante) {
   // Redirigimos a la página de actividades pasando el ID o DNI
   router.push(`/registro/actividades/${participante.dni}`)
 }
 
-function openAddActividad (participante) {
+function openAddActividad(participante) {
   selectedParticipante.value = participante
   dialogActividad.value = true
 }
 
-function onActividadSaved (data) {
+function onActividadSaved(data) {
   console.log('Actividad registrada:', data)
   dialogActividad.value = false
 }
