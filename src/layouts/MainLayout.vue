@@ -32,12 +32,6 @@ const ui = useUiStore()
 
 const linksList = [
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'las la-graduation-cap',
-    link: 'https://quasar.dev',
-  },
-  {
     title: 'Usuarios',
     caption: '',
     icon: 'lar la-user',
@@ -84,12 +78,6 @@ const linksList = [
     caption: '',
     icon: 'las la-graduation-cap',
     link: 'https://quasar.dev',
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'las la-shapes',
-    link: 'https://awesome.quasar.dev',
-  },
+  }
 ]
 </script>

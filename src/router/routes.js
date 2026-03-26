@@ -3,7 +3,8 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') },
+      { path: '', redirect: '/login' },
+      { path: 'home', component: () => import('pages/IndexPage.vue') },
       { path: 'Participante', component: () => import('src/pages/Participantes/ParticipantePage.vue') },
       { path: 'Evento', component: () => import('src/pages/Eventos/EventoPage.vue') },
       { path: 'Registro', component: () => import('src/pages/Registros/RegistroPage.vue') },
