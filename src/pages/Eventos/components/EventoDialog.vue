@@ -52,7 +52,7 @@
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-date v-model="form.fecha_inicio">
+                      <q-date v-model="form.fecha_inicio" mask="YYYY/MM/DD" :locale="myLocale">
                         <div class="row items-center justify-end">
                           <q-btn v-close-popup label="Cerrar" color="primary" flat />
                         </div>
@@ -67,11 +67,11 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div class="text-weight-bold q-mb-xs">Fecha de Finalización</div>
-              <q-input filled v-model="form.fecha_finalizacion" mask="####/##/##" placeholder="aaaa/mm/dd">
+              <q-input filled v-model="form.fecha_fin" mask="####/##/##" placeholder="aaaa/mm/dd">
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-date v-model="form.fecha_finalizacion">
+                      <q-date v-model="form.fecha_fin" mask="YYYY/MM/DD" :locale="myLocale">
                         <div class="row items-center justify-end">
                           <q-btn v-close-popup label="Cerrar" color="primary" flat />
                         </div>
@@ -116,12 +116,20 @@ const open = computed({
 
 const isEdit = computed(() => !!props.initialData?.id)
 
+const myLocale = {
+  days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
+  daysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
+  months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
+  monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
+  firstDayOfWeek: 1
+}
+
 const form = ref({
   nombre: '',
   lugar: '',
   anio: '',
   fecha_inicio: '',
-  fecha_finalizacion: ''
+  fecha_fin: ''
 })
 
 watch(
@@ -143,7 +151,7 @@ function clearForm () {
     lugar: '',
     anio: '',
     fecha_inicio: '',
-    fecha_finalizacion: ''
+    fecha_fin: ''
   }
 }
 

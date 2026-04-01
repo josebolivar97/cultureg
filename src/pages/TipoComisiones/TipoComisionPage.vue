@@ -14,6 +14,7 @@
         :rows="rows"
         :columns="columns"
         :filter="filter"
+        :loading="loading"
         row-key="id"
         no-data-label="Ningún dato disponible en esta tabla"
         rows-per-page-label="Filas por página"
@@ -33,7 +34,7 @@
         <template #body-cell-actions="props">
           <q-td class="text-center q-gutter-x-sm">
             <q-btn outline dense icon="edit" color="positive" @click="openEdit(props.row)" />
-            <q-btn outline dense icon="delete" color="negative" @click="deleteRow(props.row.id)" />
+            <q-btn outline dense icon="delete" color="negative" @click="confirmDelete(props.row.id)" />
           </q-td>
         </template>
       </q-table>
@@ -44,28 +45,101 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { api } from 'boot/axios'
+import { useQuasar } from 'quasar'
 import TipoComisionDialog from './components/TipoComisionDialog.vue'
 
 // Estado reactivo
+const $q = useQuasar()
 const filter = ref('')
 const dialog = ref(false)
 const selectedRow = ref(null)
+const rows = ref([])
+const loading = ref(false)
 
-// Datos de ejemplo
-const rows = ref([
-  { id: 1, nombre: 'Permanente' },
-  { id: 2, nombre: 'Especial' },
-])
-
-// Definición de columnas según image_c67cb0.png
 const columns = [
   { name: 'id', label: 'N°', field: 'id', align: 'left', sortable: true },
   { name: 'nombre', label: 'Nombre', field: 'nombre', align: 'left', sortable: true },
   { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' },
 ]
 
-// Lógica de apertura
+// --- MÉTODOS DE LA API ---
+
+// 1. Cargar datos (Cambiado a /tip_comisiones)
+const getTiposComision = async () => {
+  loading.value = true
+  try {
+    const response = await api.get('/tip_comisiones')
+    rows.value = response.data.data !== undefined ? response.data.data : response.data
+  } catch (err) {
+    console.error(err)
+    $q.notify({ type: 'negative', message: 'Error al obtener datos del servidor' })
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  getTiposComision()
+})
+
+// 2. Guardar (Cambiado a /tip_comisiones)
+const handleSave = async (payload) => {
+  try {
+    $q.loading.show({ message: 'Procesando...' })
+
+    if (selectedRow.value?.id) {
+      // EDITAR (PUT)
+      await api.put(`/tip_comisiones/${selectedRow.value.id}`, payload)
+      $q.notify({ type: 'positive', message: 'Registro actualizado con éxito' })
+    } else {
+      // CREAR (POST)
+      await api.post('/tip_comisiones', payload)
+      $q.notify({ type: 'positive', message: 'Nuevo registro guardado' })
+    }
+
+    dialog.value = false
+    getTiposComision()
+  } catch (error) {
+    console.error(error)
+
+    let errorMsg = 'No se pudo guardar la información'
+    if (error.response?.data?.errors) {
+      errorMsg = Object.values(error.response.data.errors)[0][0]
+    } else if (error.response?.data?.message) {
+      errorMsg = error.response.data.message
+    }
+
+    $q.notify({ type: 'negative', message: errorMsg })
+  } finally {
+    $q.loading.hide()
+  }
+}
+
+// 3. Eliminar (Cambiado a /tip_comisiones)
+const confirmDelete = (id) => {
+  $q.dialog({
+    title: 'Confirmar Eliminación',
+    message: '¿Estás seguro de que deseas eliminar este tipo de comisión?',
+    persistent: true,
+    ok: { color: 'negative', label: 'Eliminar', flat: true },
+    cancel: { label: 'Cancelar', flat: true }
+  }).onOk(async () => {
+    try {
+      await api.delete(`/tip_comisiones/${id}`)
+      $q.notify({ type: 'positive', message: 'Eliminado correctamente' })
+      getTiposComision()
+    } catch (error) {
+      let errorMsg = 'Error al intentar eliminar'
+      if (error.response?.data?.message) {
+        errorMsg = error.response.data.message
+      }
+      $q.notify({ type: 'negative', message: errorMsg })
+    }
+  })
+}
+
 function openCreate() {
   selectedRow.value = null
   dialog.value = true
@@ -74,28 +148,5 @@ function openCreate() {
 function openEdit(row) {
   selectedRow.value = { ...row }
   dialog.value = true
-}
-
-// Lógica de guardado
-function handleSave(payload) {
-  if (selectedRow.value?.id) {
-    // Editar existente
-    const idx = rows.value.findIndex((r) => r.id === selectedRow.value.id)
-    if (idx !== -1) {
-      rows.value[idx].nombre = payload.nombre
-    }
-  } else {
-    // Crear nuevo
-    rows.value.push({
-      id: rows.value.length + 1,
-      nombre: payload.nombre,
-    })
-  }
-  dialog.value = false
-}
-
-// Lógica de eliminación
-function deleteRow(id) {
-  rows.value = rows.value.filter((r) => r.id !== id)
 }
 </script>

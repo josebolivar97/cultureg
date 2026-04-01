@@ -55,7 +55,8 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
+import { api } from 'boot/axios'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -71,11 +72,20 @@ const open = computed({
 
 const isEdit = computed(() => !!props.initialData?.id)
 
-// Opciones de ejemplo para el Select (Luego vendrán de tu API de TipoComision)
-const tipoComisionesOptions = [
-  { label: 'Permanente', value: 1 },
-  { label: 'Especial', value: 2 }
-]
+const tipoComisionesOptions = ref([])
+
+onMounted(async () => {
+  try {
+    const response = await api.get('/tip_comisiones')
+    const data = response.data.data !== undefined ? response.data.data : response.data
+    tipoComisionesOptions.value = data.map(item => ({
+      label: item.nombre,
+      value: item.id
+    }))
+  } catch (error) {
+    console.error('Error al cargar tipos de comisión', error)
+  }
+})
 
 const form = ref({
   nombre: '',
@@ -83,14 +93,14 @@ const form = ref({
 })
 
 watch(
-  () => [props.modelValue, props.initialData],
+  () => [props.modelValue, props.initialData, tipoComisionesOptions.value],
   ([isOpen]) => {
     if (!isOpen) return
     if (props.initialData) {
       form.value.nombre = props.initialData.nombre
       // Buscamos el objeto que coincida con el ID para el select
-      form.value.tipo_comision_obj = tipoComisionesOptions.find(
-        opt => opt.value === props.initialData.tipo_comision_id
+      form.value.tipo_comision_obj = tipoComisionesOptions.value.find(
+        opt => opt.value === props.initialData.tip_comisions_id
       ) || null
     } else {
       clearForm()
@@ -109,8 +119,8 @@ function clearForm () {
 function resetForm () {
   if (props.initialData) {
     form.value.nombre = props.initialData.nombre
-    form.value.tipo_comision_obj = tipoComisionesOptions.find(
-      opt => opt.value === props.initialData.tipo_comision_id
+    form.value.tipo_comision_obj = tipoComisionesOptions.value.find(
+      opt => opt.value === props.initialData.tip_comisions_id
     ) || null
   } else {
     clearForm()
@@ -120,8 +130,7 @@ function resetForm () {
 function submit () {
   emit('save', {
     nombre: form.value.nombre.trim(),
-    tipo_comision_id: form.value.tipo_comision_obj.value,
-    tipo_comision_label: form.value.tipo_comision_obj.label
+    tip_comisions_id: form.value.tipo_comision_obj.value
   })
 }
 

@@ -43,46 +43,43 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { api } from 'boot/axios'
+import { useQuasar } from 'quasar'
 import EventoDialog from './components/EventoDialog.vue'
 
+const $q = useQuasar()
 const filter = ref('')
 const dialog = ref(false)
 const selectedRow = ref(null)
+const loading = ref(false)
+const rows = ref([])
 
-// Datos de ejemplo
-const rows = ref([
-  {
-    id: 1,
-    nombre: 'Aniversario Institucional',
-    lugar: 'Auditorio Central',
-    anio: '2025',
-    fecha_inicio: '2025/11/04',
-    fecha_finalizacion: '2025/11/05',
-  },
-])
-
-// Columnas según image_c6f582.png
 const columns = [
   { name: 'id', label: 'N°', field: 'id', align: 'left', sortable: true },
   { name: 'nombre', label: 'Nombre de Evento', field: 'nombre', align: 'left', sortable: true },
   { name: 'lugar', label: 'Lugar', field: 'lugar', align: 'left', sortable: true },
-  {
-    name: 'fecha_inicio',
-    label: 'Fecha de Inicio',
-    field: 'fecha_inicio',
-    align: 'left',
-    sortable: true,
-  },
-  {
-    name: 'fecha_finalizacion',
-    label: 'Fecha de Finalización',
-    field: 'fecha_finalizacion',
-    align: 'left',
-    sortable: true,
-  },
-  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' },
+  { name: 'fecha_inicio', label: 'Fecha de Inicio', field: 'fecha_inicio', align: 'left', sortable: true },
+  { name: 'fecha_fin', label: 'Fecha de Finalización', field: 'fecha_fin', align: 'left', sortable: true },
+  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' }
 ]
+
+const getEventos = async () => {
+  loading.value = true
+  try {
+    const response = await api.get('/eventos')
+    rows.value = response.data.data !== undefined ? response.data.data : response.data
+  } catch (err) {
+    console.error(err)
+    $q.notify({ type: 'negative', message: 'Error al obtener datos' })
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  getEventos()
+})
 
 function openCreate() {
   selectedRow.value = null
@@ -94,22 +91,40 @@ function openEdit(row) {
   dialog.value = true
 }
 
-function handleSave(payload) {
-  if (selectedRow.value?.id) {
-    const idx = rows.value.findIndex((r) => r.id === selectedRow.value.id)
-    if (idx !== -1) {
-      rows.value[idx] = { ...rows.value[idx], ...payload }
+const handleSave = async (payload) => {
+  try {
+    $q.loading.show()
+    if (selectedRow.value?.id) {
+      await api.put(`/eventos/${selectedRow.value.id}`, payload)
+    } else {
+      await api.post('/eventos', payload)
     }
-  } else {
-    rows.value.push({
-      id: rows.value.length + 1,
-      ...payload,
-    })
+    dialog.value = false
+    getEventos()
+    $q.notify({ type: 'positive', message: 'Operación exitosa' })
+  } catch (error) {
+    console.error(error)
+    $q.notify({ type: 'negative', message: 'Error al guardar' })
+  } finally {
+    $q.loading.hide()
   }
-  dialog.value = false
 }
 
-function deleteRow(id) {
-  rows.value = rows.value.filter((r) => r.id !== id)
+const deleteRow = (id) => {
+  $q.dialog({
+    title: 'Confirmar',
+    message: '¿Eliminar registro?',
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    try {
+      await api.delete(`/eventos/${id}`)
+      getEventos()
+      $q.notify({ type: 'positive', message: 'Eliminado correctamente' })
+    } catch (err) {
+      console.error(err)
+      $q.notify({ type: 'negative', message: 'Error al eliminar' })
+    }
+  })
 }
 </script>
