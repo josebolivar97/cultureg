@@ -48,11 +48,11 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="text-weight-bold q-mb-xs">Fecha de Inicio</div>
-              <q-input filled v-model="form.fecha_inicio" mask="####/##/##" placeholder="aaaa/mm/dd">
+              <q-input filled v-model="form.fecha_inicio" mask="##/##/####" placeholder="dd/mm/aaaa">
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-date v-model="form.fecha_inicio" mask="YYYY/MM/DD" :locale="myLocale">
+                      <q-date v-model="form.fecha_inicio" mask="DD/MM/YYYY" :locale="myLocale">
                         <div class="row items-center justify-end">
                           <q-btn v-close-popup label="Cerrar" color="primary" flat />
                         </div>
@@ -67,11 +67,11 @@
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <div class="text-weight-bold q-mb-xs">Fecha de Finalización</div>
-              <q-input filled v-model="form.fecha_fin" mask="####/##/##" placeholder="aaaa/mm/dd">
+              <q-input filled v-model="form.fecha_fin" mask="##/##/####" placeholder="dd/mm/aaaa">
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-date v-model="form.fecha_fin" mask="YYYY/MM/DD" :locale="myLocale">
+                      <q-date v-model="form.fecha_fin" mask="DD/MM/YYYY" :locale="myLocale">
                         <div class="row items-center justify-end">
                           <q-btn v-close-popup label="Cerrar" color="primary" flat />
                         </div>
@@ -138,6 +138,12 @@ watch(
     if (!isOpen) return
     if (props.initialData) {
       form.value = { ...props.initialData }
+      if (form.value.fecha_inicio) {
+        form.value.fecha_inicio = String(form.value.fecha_inicio).split(' ')[0].split('-').reverse().join('/')
+      }
+      if (form.value.fecha_fin) {
+        form.value.fecha_fin = String(form.value.fecha_fin).split(' ')[0].split('-').reverse().join('/')
+      }
     } else {
       clearForm()
     }
@@ -158,13 +164,31 @@ function clearForm () {
 function resetForm () {
   if (props.initialData) {
     form.value = { ...props.initialData }
+    if (form.value.fecha_inicio) {
+      form.value.fecha_inicio = String(form.value.fecha_inicio).split(' ')[0].split('-').reverse().join('/')
+    }
+    if (form.value.fecha_fin) {
+      form.value.fecha_fin = String(form.value.fecha_fin).split(' ')[0].split('-').reverse().join('/')
+    }
   } else {
     clearForm()
   }
 }
 
 function submit () {
-  emit('save', { ...form.value })
+  const payload = { ...form.value }
+  
+  if (payload.fecha_inicio) {
+    const [d, m, y] = payload.fecha_inicio.split('/')
+    payload.fecha_inicio = `${y}-${m}-${d}`
+  }
+  
+  if (payload.fecha_fin) {
+    const [d, m, y] = payload.fecha_fin.split('/')
+    payload.fecha_fin = `${y}-${m}-${d}`
+  }
+
+  emit('save', payload)
 }
 
 function close () {

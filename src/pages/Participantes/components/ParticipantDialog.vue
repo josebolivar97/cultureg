@@ -14,7 +14,6 @@
           ref="stepper"
           color="primary"
           animated
-          header-nav
           flat
         >
           <q-step
@@ -26,13 +25,13 @@
             <q-form ref="formStep1" class="q-gutter-y-md">
               <div class="text-subtitle1 text-center text-weight-bold text-uppercase q-mb-md">Datos Personales</div>
               <div class="row q-col-gutter-md">
-                <div class="col-12 col-md-4">
-                  <q-input filled v-model="form.dni" label="DNI" mask="########" :rules="[val => !!val || 'El DNI es obligatorio']" />
+                <div class="col-12 col-md-6">
+                  <q-input filled v-model="form.dni" label="DNI" mask="########" :rules="[val => !!val || 'El DNI es obligatorio']">
+                    <template v-slot:append>
+                      <q-btn round dense flat icon="search" color="primary" @click="searchDni" />
+                    </template>
+                  </q-input>
                 </div>
-                <div class="col-12 col-md-2">
-                  <q-btn color="primary" icon="search" class="full-width" style="height: 56px" @click="searchDni" />
-                </div>
-                <div class="col-12 col-md-6"></div>
 
                 <div class="col-12 col-md-4">
                   <q-input filled v-model="form.nombres" label="Nombres" :rules="[val => !!val || 'Campo requerido']" />
@@ -135,6 +134,8 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { api } from 'boot/axios'
+import { useQuasar } from 'quasar'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -142,6 +143,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
+const $q = useQuasar()
 
 const open = computed({
   get: () => props.modelValue,
@@ -193,8 +195,29 @@ function submit () {
   emit('save', { ...form.value })
 }
 
-function searchDni () {
-  console.log('Buscando DNI...')
+async function searchDni () {
+  if (!form.value.dni || form.value.dni.length !== 8) {
+    if ($q) $q.notify({ type: 'warning', message: 'Ingrese un DNI válido de 8 dígitos' })
+    return
+  }
+  
+  try {
+    if ($q) $q.loading.show()
+    const response = await api.get(`/dni/${form.value.dni}`)
+    if (response.data.success) {
+      form.value.nombres = response.data.nombres || ''
+      form.value.apellido_paterno = response.data.apellido_paterno || ''
+      form.value.apellido_materno = response.data.apellido_materno || ''
+      if ($q) $q.notify({ type: 'positive', message: 'Datos encontrados' })
+    } else {
+      if ($q) $q.notify({ type: 'warning', message: response.data.message || 'No se pudo consultar el DNI' })
+    }
+  } catch (error) {
+    console.error(error)
+    if ($q) $q.notify({ type: 'negative', message: 'Error al consultar DNI' })
+  } finally {
+    if ($q) $q.loading.hide()
+  }
 }
 
 function clearFields () {

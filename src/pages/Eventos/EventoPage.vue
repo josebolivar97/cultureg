@@ -59,8 +59,8 @@ const columns = [
   { name: 'id', label: 'N°', field: 'id', align: 'left', sortable: true },
   { name: 'nombre', label: 'Nombre de Evento', field: 'nombre', align: 'left', sortable: true },
   { name: 'lugar', label: 'Lugar', field: 'lugar', align: 'left', sortable: true },
-  { name: 'fecha_inicio', label: 'Fecha de Inicio', field: 'fecha_inicio', align: 'left', sortable: true },
-  { name: 'fecha_fin', label: 'Fecha de Finalización', field: 'fecha_fin', align: 'left', sortable: true },
+  { name: 'fecha_inicio', label: 'Fecha de Inicio', field: 'fecha_inicio', align: 'left', sortable: true, format: val => val ? String(val).split(' ')[0] : '' },
+  { name: 'fecha_fin', label: 'Fecha de Finalización', field: 'fecha_fin', align: 'left', sortable: true, format: val => val ? String(val).split(' ')[0] : '' },
   { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' }
 ]
 
